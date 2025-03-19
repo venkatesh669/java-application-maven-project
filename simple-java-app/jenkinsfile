@@ -11,6 +11,22 @@ pipeline {
               git 'https://github.com/venkatesh669/java-application-maven-project.git'
             }
         }
+
+stage('Install Maven') {
+            steps {
+                script {
+                    // Install Maven if not available
+                    sh '''
+                        if ! command -v mvn &> /dev/null
+                        then
+                            echo "Maven could not be found, installing Maven..."
+                            apt-get update -y
+                            apt-get install -y maven
+                        fi
+                    '''
+                }
+            }
+        }
         
         stage('Build') {
             steps {
