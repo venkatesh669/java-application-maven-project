@@ -20,8 +20,8 @@ stage('Install Maven') {
                         if ! command -v mvn &> /dev/null
                         then
                             echo "Maven could not be found, installing Maven..."
-                            apt-get update -y
-                            apt-get install -y maven
+                            apk update
+                            apk add maven
                         fi
                     '''
                 }
