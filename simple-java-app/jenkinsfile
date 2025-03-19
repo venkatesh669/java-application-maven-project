@@ -65,4 +65,10 @@ pipeline {
             echo 'The pipeline failed.'
         }
     }
+   post {
+        always {
+            // Clean up the workspace
+            deleteDir()  // This will delete the workspace directory for the current job
+        }
+    }
 }
