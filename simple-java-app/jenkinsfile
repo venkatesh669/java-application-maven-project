@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        docker { image 'maven:3.8.1-openjdk-11' }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "simple-java-app"
@@ -13,39 +11,39 @@ pipeline {
               git 'https://github.com/venkatesh669/java-application-maven-project.git'
             }
         }
-
+        
         stage('Build') {
             steps {
                 script {
                     // Build with Maven
-                    sh 'mvn clean install || exit 1'
+                    sh 'mvn clean install'
                 }
             }
         }
-
+        
         stage('Docker Build') {
             steps {
                 script {
                     // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE . || exit 1'
+                    sh 'docker build -t ${DOCKER_IMAGE} .'
                 }
             }
         }
-
+        
         stage('Run Tests') {
             steps {
                 script {
                     // Run tests with Maven
-                    sh 'mvn test || exit 1'
+                    sh 'mvn test'
                 }
             }
         }
-
+        
         stage('Deploy') {
             steps {
                 script {
                     // Deploy the Docker container
-                    sh 'docker run -d -p 8080:8080 $DOCKER_IMAGE || exit 1'
+                    sh 'docker run -d -p 8080:8080 ${DOCKER_IMAGE}'
                 }
             }
         }
@@ -54,21 +52,6 @@ pipeline {
     post {
         always {
             cleanWs()
-        }
-
-        success {
-            // Optionally, clean up Docker images/containers after successful deployment
-            sh 'docker system prune -f'
-        }
-
-        failure {
-            echo 'The pipeline failed.'
-        }
-    }
-   post {
-        always {
-            // Clean up the workspace
-            deleteDir()  // This will delete the workspace directory for the current job
         }
     }
 }
