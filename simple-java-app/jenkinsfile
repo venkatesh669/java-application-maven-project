@@ -11,30 +11,6 @@ pipeline {
               git 'https://github.com/venkatesh669/java-application-maven-project.git'
             }
         }
-
-stage('Install Maven') {
-            steps {
-                script {
-                    // Install Maven if not available
-                    sh '''
-                        if ! command -v mvn &> /dev/null
-                        then
-                            echo "Maven could not be found, installing Maven..."
-                            yum install maven
-                        fi
-                    '''
-                }
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                script {
-                    // Build with Maven
-                    sh 'mvn clean install'
-                }
-            }
-        }
         
         stage('Docker Build') {
             steps {
@@ -50,6 +26,15 @@ stage('Install Maven') {
                 script {
                     // Run tests with Maven
                     sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Build with Maven
+                    sh 'mvn clean install'
                 }
             }
         }
