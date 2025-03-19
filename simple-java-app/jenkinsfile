@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'maven:3.8.1-openjdk-11' }
+    }
 
     environment {
         DOCKER_IMAGE = "simple-java-app"
@@ -11,40 +13,39 @@ pipeline {
               git 'https://github.com/venkatesh669/java-application-maven-project.git'
             }
         }
- stage('Build') {
+
+        stage('Build') {
             steps {
                 script {
                     // Build with Maven
-                    sh 'mvn clean install'
-                }
-            }
-        }
-        
-        stage('Docker Build') {
-            steps {
-                script {
-                    // Build Docker image
-                    sh 'docker build -t ${DOCKER_IMAGE} .'
-                }
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Run tests with Maven
-                    sh 'mvn test'
+                    sh 'mvn clean install || exit 1'
                 }
             }
         }
 
-       
-        
+        stage('Docker Build') {
+            steps {
+                script {
+                    // Build Docker image
+                    sh 'docker build -t $DOCKER_IMAGE . || exit 1'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run tests with Maven
+                    sh 'mvn test || exit 1'
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 script {
                     // Deploy the Docker container
-                    sh 'docker run -d -p 8080:8080 ${DOCKER_IMAGE}'
+                    sh 'docker run -d -p 8080:8080 $DOCKER_IMAGE || exit 1'
                 }
             }
         }
@@ -54,6 +55,14 @@ pipeline {
         always {
             cleanWs()
         }
+
+        success {
+            // Optionally, clean up Docker images/containers after successful deployment
+            sh 'docker system prune -f'
+        }
+
+        failure {
+            echo 'The pipeline failed.'
+        }
     }
 }
-
